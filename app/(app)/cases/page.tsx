@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CaseDocument } from "@/lib/types";
 import { clientAuth } from "@/lib/firebase-client";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function CasesPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [items, setItems] = useState<CaseDocument[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"" | "DRAFT" | "COMPLETED">("");
@@ -37,17 +39,17 @@ export default function CasesPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Case History</h1>
+      <h1 className="text-2xl font-bold">{t("caseHistory")}</h1>
       <div className="flex gap-2">
-        <Input placeholder="Search title" value={query} onChange={(event) => setQuery(event.target.value)} />
+        <Input placeholder={t("searchTitle")} value={query} onChange={(event) => setQuery(event.target.value)} />
         <select
           className="min-h-12 rounded-md border border-slate-300 px-3"
           value={status}
           onChange={(event) => setStatus(event.target.value as "" | "DRAFT" | "COMPLETED")}
         >
-          <option value="">All</option>
-          <option value="DRAFT">Draft</option>
-          <option value="COMPLETED">Completed</option>
+          <option value="">{t("all")}</option>
+          <option value="DRAFT">{t("draft")}</option>
+          <option value="COMPLETED">{t("completed")}</option>
         </select>
       </div>
       <div className="space-y-3">
@@ -69,7 +71,7 @@ export default function CasesPage() {
         ))}
       </div>
       <Button variant="secondary" onClick={() => void loadCases()}>
-        Refresh
+        {t("refresh")}
       </Button>
     </div>
   );

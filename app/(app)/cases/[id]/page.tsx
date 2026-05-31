@@ -9,9 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CaseDocument } from "@/lib/types";
 import { clientAuth } from "@/lib/firebase-client";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function CaseDetailsPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const [item, setItem] = useState<CaseDocument | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -39,12 +41,12 @@ export default function CaseDetailsPage() {
   }, [params.id, router]);
 
   if (!item) {
-    return <p className="text-sm text-slate-600">Loading case...</p>;
+    return <p className="text-sm text-slate-600">{t("loadingCase")}</p>;
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Case Details</h1>
+      <h1 className="text-2xl font-bold">{t("caseDetails")}</h1>
       <Card className="space-y-2">
         <Input value={title} onChange={(event) => setTitle(event.target.value)} />
         <Textarea value={notes} onChange={(event) => setNotes(event.target.value)} />
@@ -70,10 +72,10 @@ export default function CaseDetailsPage() {
             router.push("/cases");
           }}
         >
-          Save draft
+          {t("saveDraft")}
         </Button>
         <Button variant="secondary" onClick={() => router.push("/new-case")}>
-          Re-export
+          {t("reExport")}
         </Button>
       </div>
     </div>

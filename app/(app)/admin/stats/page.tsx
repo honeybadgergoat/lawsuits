@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { clientAuth } from "@/lib/firebase-client";
 import { Card } from "@/components/ui/card";
+import { useI18n } from "@/components/LanguageProvider";
 
 interface StatRow {
   userId: string;
@@ -13,6 +14,7 @@ interface StatRow {
 }
 
 export default function AdminStatsPage() {
+  const { t } = useI18n();
   const [rows, setRows] = useState<StatRow[]>([]);
 
   useEffect(() => {
@@ -30,15 +32,15 @@ export default function AdminStatsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Admin · Usage stats</h1>
+      <h1 className="text-2xl font-bold">{t("adminStatsTitle")}</h1>
       <Card className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200">
-              <th className="p-2">Judge</th>
-              <th className="p-2">AI today</th>
-              <th className="p-2">AI month</th>
-              <th className="p-2">Cases month</th>
+              <th className="p-2">{t("judge")}</th>
+              <th className="p-2">{t("aiToday")}</th>
+              <th className="p-2">{t("aiMonth")}</th>
+              <th className="p-2">{t("casesMonth")}</th>
             </tr>
           </thead>
           <tbody>

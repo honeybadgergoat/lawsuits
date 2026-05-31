@@ -8,10 +8,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { clientAuth } from "@/lib/firebase-client";
+import { useI18n } from "@/components/LanguageProvider";
 
 type FlowStep = "OCR" | "FIELDS" | "EXPORT";
 
 export default function NewCasePage() {
+  const { t } = useI18n();
   const [step, setStep] = useState<FlowStep>("OCR");
   const [rawOcrText, setRawOcrText] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -24,7 +26,7 @@ export default function NewCasePage() {
   async function authHeader(): Promise<HeadersInit> {
     const token = await clientAuth.currentUser?.getIdToken();
     if (!token) {
-      throw new Error("Not authenticated");
+      throw new Error(t("missingSession"));
     }
     return {
       "Content-Type": "application/json",
@@ -55,13 +57,13 @@ export default function NewCasePage() {
 
       const payload = (await response.json()) as { fields?: Record<string, string>; error?: { message: string } };
       if (!response.ok || !payload.fields) {
-        throw new Error(payload.error?.message ?? "AI extraction failed.");
+        throw new Error(payload.error?.message ?? t("ocrFailed"));
       }
 
       setFields(payload.fields);
       setStep("FIELDS");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "AI extraction failed.");
+      setMessage(error instanceof Error ? error.message : t("ocrFailed"));
     } finally {
       setLoading(false);
     }
@@ -85,7 +87,7 @@ export default function NewCasePage() {
 
       if (!response.ok) {
         const payload = (await response.json()) as { error?: { message: string } };
-        throw new Error(payload.error?.message ?? "Export failed.");
+        throw new Error(payload.error?.message ?? t("generateDocument"));
       }
 
       const newCaseId = response.headers.get("x-case-id");
@@ -101,9 +103,9 @@ export default function NewCasePage() {
       anchor.click();
       URL.revokeObjectURL(url);
       setStep("EXPORT");
-      setMessage("Document generated and downloaded.");
+      setMessage(t("caseCompleted"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Export failed.");
+      setMessage(error instanceof Error ? error.message : t("generateDocument"));
     } finally {
       setLoading(false);
     }
@@ -111,22 +113,22 @@ export default function NewCasePage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">New Case</h1>
+      <h1 className="text-2xl font-bold">{t("newCaseTitle")}</h1>
       {step === "OCR" ? <ImageConversation onFinalize={(text) => void runFieldExtraction(text)} /> : null}
       {step === "FIELDS" ? (
         <div className="space-y-4">
           <FieldReviewForm fields={fields} onChange={setFields} />
           <Card className="space-y-3">
-            <h2 className="text-lg font-semibold">Case metadata</h2>
-            <Input placeholder="Case title" value={title} onChange={(event) => setTitle(event.target.value)} />
-            <Textarea placeholder="Optional notes" value={notes} onChange={(event) => setNotes(event.target.value)} />
+            <h2 className="text-lg font-semibold">{t("caseMetadata")}</h2>
+            <Input placeholder={t("caseTitle")} value={title} onChange={(event) => setTitle(event.target.value)} />
+            <Textarea placeholder={t("optionalNotes")} value={notes} onChange={(event) => setNotes(event.target.value)} />
             <Button disabled={loading || !title.trim()} onClick={() => void exportDocx()}>
-              {loading ? "Generating..." : "Generate document"}
+              {loading ? t("generating") : t("generateDocument")}
             </Button>
           </Card>
         </div>
       ) : null}
-      {step === "EXPORT" ? <Card>Case completed. You can reopen it in Case History.</Card> : null}
+      {step === "EXPORT" ? <Card>{t("caseCompleted")}</Card> : null}
       {message ? <p className="text-sm text-slate-700">{message}</p> : null}
     </div>
   );

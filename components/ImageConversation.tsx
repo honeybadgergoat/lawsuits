@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { OcrPreview } from "@/components/OcrPreview";
 import { extractTextFromImage } from "@/lib/ocr";
 import { clientAuth } from "@/lib/firebase-client";
+import { useI18n } from "@/components/LanguageProvider";
 
 interface ConversationPage {
   id: string;
@@ -21,6 +22,7 @@ interface ImageConversationProps {
 }
 
 export function ImageConversation({ onFinalize }: ImageConversationProps) {
+  const { t } = useI18n();
   const [pages, setPages] = useState<ConversationPage[]>([]);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("Idle");
@@ -37,12 +39,12 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
   async function handleFileSelect(file: File, pageId: string, pageNumber: number) {
     setLoading(true);
     setError("");
-    setProgress(`Processing page ${pageNumber}`);
+    setProgress(t("processingPage", { count: pageNumber }));
     try {
       const previewUrl = URL.createObjectURL(file);
       const token = await clientAuth.currentUser?.getIdToken();
       if (!token) {
-        throw new Error("Missing auth session. Please sign in again.");
+        throw new Error(t("missingSession"));
       }
 
       const text = await extractTextFromImage(file, token, (status) => {
@@ -62,7 +64,7 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
         )
       );
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Failed to extract OCR text.");
+      setError(nextError instanceof Error ? nextError.message : t("ocrFailed"));
     } finally {
       setLoading(false);
     }
@@ -87,7 +89,9 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
         }}
       />
 
-      <div className="text-xs text-slate-500">{loading ? progress : `Total pages: ${pages.length}`}</div>
+      <div className="text-xs text-slate-500">
+        {loading ? progress : t("totalPages", { count: pages.length })}
+      </div>
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       <div className="space-y-6">
@@ -105,16 +109,16 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
                     unoptimized
                   />
                 ) : (
-                  <p className="text-xs text-slate-500">No image uploaded yet.</p>
+                  <p className="text-xs text-slate-500">{t("noImageUploaded")}</p>
                 )}
-                <p className="mt-2 text-right text-xs text-slate-500">Page {index + 1}</p>
+                <p className="mt-2 text-right text-xs text-slate-500">{t("pageNumber", { count: index + 1 })}</p>
               </div>
             </div>
 
             <div className="flex justify-start">
               <div className="w-[90%] max-w-xl rounded-2xl rounded-bl-md bg-white/90 p-3">
                 <OcrPreview
-                  label="OCR output"
+                  label={t("ocrOutput")}
                   value={page.text}
                   onChange={(next) =>
                     setPages((prev) =>
@@ -122,7 +126,7 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
                     )
                   }
                 />
-                <p className="mt-2 text-left text-xs text-slate-500">Assistant</p>
+                <p className="mt-2 text-left text-xs text-slate-500">{t("assistant")}</p>
               </div>
             </div>
           </div>
@@ -134,11 +138,11 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
         disabled={pages.length >= 10 || loading}
         onClick={() => addPageInputRef.current?.click()}
       >
-        Add new page (upload or camera)
+        {t("addPage")}
       </Button>
-      <OcrPreview label="Final concatenated OCR text" value={finalText} onChange={setFinalText} />
+      <OcrPreview label={t("finalOcrText")} value={finalText} onChange={setFinalText} />
       <Button disabled={finalText.length < 50} onClick={() => onFinalize(finalText)}>
-        Finalize and extract fields
+        {t("finalizeExtract")}
       </Button>
     </Card>
   );
