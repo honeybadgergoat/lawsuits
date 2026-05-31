@@ -1,0 +1,36 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "cases",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "judgeId", "order": "ASCENDING" },
+        { "fieldPath": "deletedAt", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cases",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "judgeId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cases",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "createdAt", "order": "DESCENDING" }]
+    },
+    {
+      "collectionGroup": "usageLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
