@@ -69,14 +69,7 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
   }
 
   return (
-    <Card className="space-y-4">
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold">OCR conversation</h2>
-        <p className="text-sm text-slate-600">
-          Final text stays at the top. Add new pages with one button (upload or camera).
-        </p>
-      </div>
-
+    <Card className="space-y-4 border-0 bg-transparent p-0 shadow-none">
       <Input
         ref={addPageInputRef}
         type="file"
@@ -99,27 +92,39 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
 
       <div className="space-y-6">
         {pages.map((page, index) => (
-          <div key={page.id} className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <h3 className="text-sm font-semibold text-slate-700">Page {index + 1}</h3>
-            {page.previewUrl ? (
-              <Image
-                src={page.previewUrl}
-                alt={`Page ${index + 1}`}
-                className="max-h-80 w-full rounded-md object-contain"
-                width={800}
-                height={1000}
-                unoptimized
-              />
-            ) : (
-              <p className="text-xs text-slate-500">No image uploaded yet.</p>
-            )}
-            <OcrPreview
-              label="Extracted OCR text"
-              value={page.text}
-              onChange={(next) =>
-                setPages((prev) => prev.map((item) => (item.id === page.id ? { ...item, text: next } : item)))
-              }
-            />
+          <div key={page.id} className="space-y-3">
+            <div className="flex justify-end">
+              <div className="w-[85%] max-w-xl rounded-2xl rounded-br-md bg-blue-50/60 p-3">
+                {page.previewUrl ? (
+                  <Image
+                    src={page.previewUrl}
+                    alt={`Page ${index + 1}`}
+                    className="max-h-80 w-full rounded-md object-contain"
+                    width={800}
+                    height={1000}
+                    unoptimized
+                  />
+                ) : (
+                  <p className="text-xs text-slate-500">No image uploaded yet.</p>
+                )}
+                <p className="mt-2 text-right text-xs text-slate-500">Page {index + 1}</p>
+              </div>
+            </div>
+
+            <div className="flex justify-start">
+              <div className="w-[90%] max-w-xl rounded-2xl rounded-bl-md bg-white/90 p-3">
+                <OcrPreview
+                  label="OCR output"
+                  value={page.text}
+                  onChange={(next) =>
+                    setPages((prev) =>
+                      prev.map((item) => (item.id === page.id ? { ...item, text: next } : item))
+                    )
+                  }
+                />
+                <p className="mt-2 text-left text-xs text-slate-500">Assistant</p>
+              </div>
+            </div>
           </div>
         ))}
       </div>
