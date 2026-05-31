@@ -6,11 +6,14 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { clientAuth } from "@/lib/firebase-client";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/components/LanguageProvider";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [ready, setReady] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(clientAuth, async (user) => {
@@ -31,36 +34,39 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }, [router]);
 
   if (!ready) {
-    return <main className="p-4 text-sm text-slate-600">Checking session...</main>;
+    return <main className="p-4 text-sm text-slate-600">{t("checkingSession")}</main>;
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3">
-        <nav className="flex items-center justify-between">
+        <nav className="flex items-center justify-between gap-3">
           <div className="flex gap-2 text-sm">
             <Link className={pathname === "/dashboard" ? "font-semibold text-accent" : "text-slate-600"} href="/dashboard">
-              Dashboard
+              {t("dashboard")}
             </Link>
             <Link className={pathname.startsWith("/new-case") ? "font-semibold text-accent" : "text-slate-600"} href="/new-case">
-              New Case
+              {t("newCase")}
             </Link>
             <Link className={pathname.startsWith("/cases") ? "font-semibold text-accent" : "text-slate-600"} href="/cases">
-              Cases
+              {t("cases")}
             </Link>
             <Link className={pathname.startsWith("/admin") ? "font-semibold text-accent" : "text-slate-600"} href="/admin">
-              Admin
+              {t("admin")}
             </Link>
           </div>
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              await signOut(clientAuth);
-              router.replace("/login");
-            }}
-          >
-            Sign out
-          </Button>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                await signOut(clientAuth);
+                router.replace("/login");
+              }}
+            >
+              {t("signOut")}
+            </Button>
+          </div>
         </nav>
       </header>
       <main className="mx-auto w-full max-w-3xl p-4">{children}</main>

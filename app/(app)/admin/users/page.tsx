@@ -6,8 +6,10 @@ import { AppUser } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useI18n } from "@/components/LanguageProvider";
 
 export default function AdminUsersPage() {
+  const { t } = useI18n();
   const [users, setUsers] = useState<AppUser[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,13 +31,13 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Admin · Users</h1>
+      <h1 className="text-2xl font-bold">{t("adminUsersTitle")}</h1>
       <Card className="space-y-2">
-        <h2 className="font-semibold">Create judge account</h2>
-        <Input placeholder="Name" value={name} onChange={(event) => setName(event.target.value)} />
-        <Input placeholder="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+        <h2 className="font-semibold">{t("createJudgeAccount")}</h2>
+        <Input placeholder={t("name")} value={name} onChange={(event) => setName(event.target.value)} />
+        <Input placeholder={t("email")} type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
         <Input
-          placeholder="Temporary password"
+          placeholder={t("temporaryPassword")}
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
@@ -58,7 +60,7 @@ export default function AdminUsersPage() {
             await loadUsers();
           }}
         >
-          Create judge
+          {t("createJudge")}
         </Button>
       </Card>
 
@@ -88,7 +90,7 @@ export default function AdminUsersPage() {
                   await loadUsers();
                 }}
               >
-                {user.isActive ? "Deactivate" : "Activate"}
+                {user.isActive ? t("deactivate") : t("activate")}
               </Button>
             </div>
           </Card>
