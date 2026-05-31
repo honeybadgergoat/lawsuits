@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { OcrPreview } from "@/components/OcrPreview";
 import { extractTextFromImage } from "@/lib/ocr";
+import { clientAuth } from "@/lib/firebase-client";
 
 interface ConversationPage {
   id: string;
@@ -25,6 +26,7 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState("Idle");
   const [finalText, setFinalText] = useState("");
+  const [error, setError] = useState("");
 
   const fullText = useMemo(() => pages.map((page) => page.text.trim()).join("\n\n").trim(), [pages]);
   const current = pages[activeIndex];
@@ -35,25 +37,36 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
 
   async function handleFileSelect(file: File) {
     setLoading(true);
+    setError("");
     setProgress(`Processing page ${activeIndex + 1}/${pages.length}`);
-    const previewUrl = URL.createObjectURL(file);
-    const text = await extractTextFromImage(file, (status) => {
-      setProgress(`${status.status} ${(status.progress * 100).toFixed(0)}%`);
-    });
+    try {
+      const previewUrl = URL.createObjectURL(file);
+      const token = await clientAuth.currentUser?.getIdToken();
+      if (!token) {
+        throw new Error("Missing auth session. Please sign in again.");
+      }
 
-    setPages((prev) =>
-      prev.map((item, index) =>
-        index === activeIndex
-          ? {
-              ...item,
-              file,
-              previewUrl,
-              text
-            }
-          : item
-      )
-    );
-    setLoading(false);
+      const text = await extractTextFromImage(file, token, (status) => {
+        setProgress(`${status.status} ${(status.progress * 100).toFixed(0)}%`);
+      });
+
+      setPages((prev) =>
+        prev.map((item, index) =>
+          index === activeIndex
+            ? {
+                ...item,
+                file,
+                previewUrl,
+                text
+              }
+            : item
+        )
+      );
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : "Failed to extract OCR text.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -94,6 +107,7 @@ export function ImageConversation({ onFinalize }: ImageConversationProps) {
       />
 
       <div className="text-xs text-slate-500">{loading ? progress : `Total pages: ${pages.length}`}</div>
+      {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       <div className="flex flex-wrap gap-2">
         <Button

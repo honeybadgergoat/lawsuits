@@ -48,13 +48,20 @@ async function getOrCreateUser(email: string, password: string, name: string): P
     });
     return created.uid;
   } catch (error) {
+    const code =
+      typeof error === "object" && error !== null && "code" in error
+        ? String((error as { code: unknown }).code)
+        : "";
     const message = error instanceof Error ? error.message : "";
-    if (!message.includes("email-already-exists")) {
+    const emailExists =
+      code === "auth/email-already-exists" || message.toLowerCase().includes("already in use");
+    if (!emailExists) {
       throw error;
     }
     const existing = await auth.getUserByEmail(email);
     await auth.updateUser(existing.uid, {
       displayName: name,
+      password,
       disabled: false
     });
     return existing.uid;
